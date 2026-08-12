@@ -11,61 +11,46 @@
 
 #include <QRegularExpression>
 
-RegisterWindow::RegisterWindow(){
+RegisterWindow::RegisterWindow(){//runs when you create a RegisterWindow
     setWindowTitle("Create Account");
     setFixedSize(350,300);
 
-    QLabel *title = new QLabel("Register New User");
+    QLabel *title = new QLabel("Register New User");//creates a label
 
-    usernameInput = new QLineEdit();
-
-    usernameInput->setPlaceholderText(
-                "Username"
-                );
-
+    usernameInput = new QLineEdit();//creates a new text box
+    usernameInput->setPlaceholderText("Username");//sets "Username" inside text box
     passwordInput = new QLineEdit();
-
-    passwordInput->setPlaceholderText(
-                "Password"
-                );
-
-    passwordInput->setEchoMode(QLineEdit::Password);
-
+    passwordInput->setPlaceholderText("Password");
+    passwordInput->setEchoMode(QLineEdit::Password);//hides characters being typed
     confirmPasswordInput = new QLineEdit();
-
-    confirmPasswordInput->setPlaceholderText(
-                "Confirm Password"
-                );
+    confirmPasswordInput->setPlaceholderText("Confirm Password");
     confirmPasswordInput->setEchoMode(QLineEdit::Password);
 
-    registerButton =
-            new QPushButton(
-                "Register"
-                );
+    registerButton = new QPushButton("Register");
 
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *layout = new QVBoxLayout();//creates final layout with all the widgets
     layout->addWidget(title);
     layout->addWidget(usernameInput);
     layout->addWidget(passwordInput);
     layout->addWidget(confirmPasswordInput);
     layout->addWidget(registerButton);
-
     setLayout(layout);
 
+    //connect the button so that when user clicks, calls the method
     connect(registerButton,
             &QPushButton::clicked,
             this,
             &RegisterWindow::registerUser);
 }
 
-QString RegisterWindow::passwordStrength(QString password){
-    bool upper=false;
-    bool lower=false;
-    bool digit=false;
-    bool special=false;
+QString RegisterWindow::passwordStrength(QString password){//password strength checker
+    bool upper = false;
+    bool lower = false;
+    bool digit = false;
+    bool special = false;
 
     QString specials = "!@#$%^&*()-+";
-    for(QChar c : password){
+    for(QChar c : password){//go through the password
         if(c.isUpper())
             upper=true;
         else if(c.isLower())
@@ -89,8 +74,8 @@ QString RegisterWindow::passwordStrength(QString password){
     return "Weak";
 }
 
-void RegisterWindow::registerUser(){
-    QString username = usernameInput->text();
+void RegisterWindow::registerUser(){//runs when user clicks the register button
+    QString username = usernameInput->text();//gets the input from the user
     QString password = passwordInput->text();
     QString confirm = confirmPasswordInput->text();
 
@@ -113,7 +98,6 @@ void RegisterWindow::registerUser(){
     }
 
     QString strength = passwordStrength(password);
-
     if(strength=="Weak"){
         QMessageBox::warning(
                     this,
@@ -128,16 +112,14 @@ void RegisterWindow::registerUser(){
         return;
     }
 
-    QSqlQuery check;
-
+    QSqlQuery check;//creates SQL query object
     check.prepare(
     "SELECT username FROM users "
     "WHERE username=?"
     );
+    check.addBindValue(username);//check for username
 
-    check.addBindValue(username);
-
-    if(check.exec() && check.next()){
+    if(check.exec() && check.next()){//check if query executes and finds a user
         QMessageBox::warning(
                     this,
                     "Error",
@@ -146,7 +128,7 @@ void RegisterWindow::registerUser(){
         return;
     }
 
-    QSqlQuery query;
+    QSqlQuery query;//create another query if user does not exist
     query.prepare(
     "INSERT INTO users(username,password)"
     "VALUES(?,?)"
