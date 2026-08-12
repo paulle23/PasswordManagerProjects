@@ -12,32 +12,30 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
-MainWindow::MainWindow(QString user){
-    currentUser=user;
-
+MainWindow::MainWindow(QString user){//main window for user that is loggin in
+    currentUser = user;
     setWindowTitle("Password Manager - " + currentUser);
     resize(700,450);
 
-    table = new QTableWidget();
+    table = new QTableWidget();//create a table with three columns
     table->setColumnCount(3);
 
-    QStringList headers;
+    QStringList headers;//set the headers for each column
     headers << "Account" << "Username" << "Password";
-    table->setHorizontalHeaderLabels(headers);
-    table->horizontalHeader()->setStretchLastSection(true);
+    table->setHorizontalHeaderLabels(headers);//applies table names
+    table->horizontalHeader()->setStretchLastSection(true);//stretches last column to fill space
 
-    searchInput = new QLineEdit();
+    searchInput = new QLineEdit();//new search box
     searchInput->setPlaceholderText("Search account...");
 
-    addButton = new QPushButton("Add");
+    addButton = new QPushButton("Add");//add the buttons for what the user can do 
     deleteButton = new QPushButton("Delete");
     updateButton = new QPushButton("Update");
     showButton = new QPushButton("Show Password");
     searchButton = new QPushButton("Search");
     logoutButton = new QPushButton("Logout");
 
-    QHBoxLayout *buttons = new QHBoxLayout();
-
+    QHBoxLayout *buttons = new QHBoxLayout();//puts buttons on horizontal layout
     buttons->addWidget(searchInput);
     buttons->addWidget(searchButton);
     buttons->addWidget(addButton);
@@ -46,8 +44,7 @@ MainWindow::MainWindow(QString user){
     buttons->addWidget(showButton);
     buttons->addWidget(logoutButton);
 
-    QVBoxLayout *layout = new QVBoxLayout();
-
+    QVBoxLayout *layout = new QVBoxLayout();//vertical layout
     layout->addWidget(table);
     layout->addLayout(buttons);
     setLayout(layout);
@@ -94,31 +91,31 @@ void MainWindow::loadPasswords(){
     );
     query.addBindValue(currentUser);
 
-    if(query.exec()){
-        while(query.next()){
-            int row = table->rowCount();
-            table->insertRow(row);
+    if(query.exec()){//executes SQL
+        while(query.next()){//moves through the returned rows one at a time
+            int row = table->rowCount();//current number of rows
+            table->insertRow(row);//creates a new row
             table->setItem(
                 row,
                 0,
                 new QTableWidgetItem(
                     query.value(0).toString()
                 )
-            );
+            );//puts database's first value into column 0, account
             table->setItem(
                 row,
                 1,
                 new QTableWidgetItem(
                     query.value(1).toString()
                 )
-            );
+            );//username
             table->setItem(
                 row,
                 2,
                 new QTableWidgetItem(
                     query.value(2).toString()
                 )
-            );
+            );//password
         }
     }
 }
@@ -135,7 +132,7 @@ void MainWindow::addPassword(){
             &ok
         );
 
-    if(!ok)
+    if(!ok)//if the user did not press ok, process cancels
         return;
 
     QString username =
@@ -163,8 +160,8 @@ void MainWindow::addPassword(){
 
     if(!ok)
         return;
-    QSqlQuery query;
 
+    QSqlQuery query;//create new query to add password
     query.prepare(
     "INSERT INTO accounts"
     "(owner,account,username,password)"
@@ -190,7 +187,6 @@ void MainWindow::addPassword(){
 
 void MainWindow::deletePassword(){
     int row = table->currentRow();
-
     if(row < 0)
         return;
 
@@ -199,7 +195,6 @@ void MainWindow::deletePassword(){
              ->text();
 
     QSqlQuery query;
-
     query.prepare(
     "DELETE FROM accounts "
     "WHERE owner=? "
@@ -215,7 +210,7 @@ void MainWindow::deletePassword(){
 
 void MainWindow::searchPassword(){
     QString text = searchInput->text();
-    for(int i=0; i<table->rowCount(); i++){
+    for(int i = 0; i < table->rowCount(); i++){
         bool match =
         table->item(i,0)
              ->text()
@@ -256,7 +251,6 @@ void MainWindow::updatePassword(){
         return;
 
     QSqlQuery query;
-
     query.prepare(
     "UPDATE accounts "
     "SET password=? "
@@ -275,7 +269,6 @@ void MainWindow::updatePassword(){
 void MainWindow::showPasswords(){
     passwordVisible = !passwordVisible;
     QSqlQuery query;
-
     query.prepare(
     "SELECT username,password "
     "FROM accounts "
@@ -283,10 +276,8 @@ void MainWindow::showPasswords(){
     );
 
     query.addBindValue(currentUser);
-
     if(query.exec()){
-        int row=0;
-
+        int row = 0;
         while(query.next()){
             if(passwordVisible){
                 table->item(row,2)
