@@ -60,12 +60,7 @@ QString RegisterWindow::passwordStrength(QString password){//password strength c
         else if(specials.contains(c))
             special=true;
     }
-    int score =
-            upper+
-            lower+
-            digit+
-            special+
-            (password.length()>=8);
+    int score = upper + lower + digit + special + (password.length()>=8);
 
     if(score==5)
         return "Strong";
